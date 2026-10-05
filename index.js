@@ -42,15 +42,34 @@ app.get('/regvisit', (req, res)=>{
 app.post('/regvisit', async (req, res)=>{
 	console.log(req.body);
 	try {
+		const date = dateET.dateET(0);
+		const time = dateET.timeET();
 		await fs.open(regTextRef, 'a');
-		await fs.appendFile(regTextRef, req.body.nameInput + ';');
+		await fs.appendFile(regTextRef, req.body.nameInput + ',' + date + ',' + time + ';');
 		res.render('regvisit');
 	}
 	catch (err){
 		console.log(err);
 		res.render('regvisit');
 	}
-	
+});
+
+app.get('/miks-tlu', (req, res)=>{
+	res.render('miks-tlu');
+});
+
+app.get('/lastvisit', async (req, res)=>{
+	try{
+		const data = await fs.readFile(regTextRef, 'utf8');
+		let visits = data.split(';');
+		let lastVisit = visits[visits.length -2];
+		let parts = lastVisit.split(',');
+		res.render('lastvisit', {name: parts[0], date: parts[1], time: parts[2]});
+	}
+	catch (err){
+		console.logg(err);
+		res.render('lastvisit', {name: '-', date: '-', time: '-'});
+	}
 });
 
 app.listen(5310);
